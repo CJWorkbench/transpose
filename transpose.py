@@ -34,7 +34,7 @@ def transpose(table):
     ret.reset_index(inplace=True)  # Makes 'Column' a column
 
     if warnings:
-        return (ret, ', '.join(warnings))
+        return (ret, '\n'.join(warnings))
     else:
         return ret
 
