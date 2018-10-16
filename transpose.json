@@ -5,17 +5,5 @@
   "icon" : "reshape",
   "description" : "Convert rows to columns and columns to rows",
   "help_url":"modules/clean/transpose",
-  "parameters": [
-    {
-      "name": "",
-      "id_name": "header_column",
-      "type": "column",
-      "placeholder": "Column-names column"
-    },
-    {
-      "name": "Rename duplicate columns",
-      "id_name": "allow_duplicates",
-      "type": "checkbox"
-    }
-  ]
+  "parameters": []
 }
