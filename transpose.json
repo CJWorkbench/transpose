@@ -1,41 +1,21 @@
 {
-  "name": "Scatter Plot",
-  "id_name": "scatterplot",
-  "category" : "Visualize",
-  "icon" : "linechart",
-  "description" : "Create a scatter plot.",
-  "html_output": true,
-  "help_url":"modules/visualize/scatter-plot",
+  "name": "Transpose",
+  "id_name": "transpose",
+  "category" : "Clean",
+  "icon" : "reshape",
+  "description" : "Convert rows to columns and columns to rows",
+  "help_url":"modules/clean/transpose",
   "parameters": [
     {
       "name": "",
-      "id_name": "title",
-      "type": "string",
-      "placeholder": "Chart title"
-    },
-    {
-      "name": "X axis",
-      "id_name": "x_axis_label",
-      "type": "string",
-      "placeholder": "Label"
-    },
-    {
-      "name": "",
-      "id_name": "x_column",
+      "id_name": "header_column",
       "type": "column",
-      "placeholder": "Select X-Axis Column"
+      "placeholder": "Column-names column"
     },
     {
-      "name": "Y axis",
-      "id_name": "y_axis_label",
-      "type": "string",
-      "placeholder": "Label"
-    },
-    {
-      "name": "Columns",
-      "id_name": "y_column",
-      "type": "column",
-      "placeholder": "Select Y-Axis Column"
+      "name": "Rename duplicate columns",
+      "id_name": "allow_duplicates",
+      "type": "checkbox"
     }
   ]
 }

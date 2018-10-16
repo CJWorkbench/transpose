@@ -12,16 +12,16 @@ class Form:
     '1', etc.
     """
 
-    def __init__(self, header_colname: Optional[str], allow_duplicates: bool):
-        self.header_colname = header_colname
+    def __init__(self, header_column: Optional[str], allow_duplicates: bool):
+        self.header_column = header_column
         self.allow_duplicates = allow_duplicates
 
     @staticmethod
-    def parse(*, header_colname=None, allow_duplicates=False, **kwargs):
-        if header_colname == '':
-            header_colname = None
+    def parse(*, header_column=None, allow_duplicates=False, **kwargs):
+        if header_column == '':
+            header_column = None
 
-        return Form(header_colname, allow_duplicates)
+        return Form(header_column, allow_duplicates)
 
 
 def transpose(table, form):
@@ -29,17 +29,17 @@ def transpose(table, form):
     if truncate:
         table = table[0:MAX_N_COLUMNS]
 
-    if form.header_colname:
-        series = table[form.header_colname]
+    if form.header_column:
+        series = table[form.header_column]
 
         if not form.allow_duplicates and series.duplicated().any():
             return (
-                f'Column "{form.header_colname}" has duplicated values, so '
+                f'Column "{form.header_column}" has duplicated values, so '
                 'transposing by it would create duplicate column names. '
                 'Please confirm you want this.'
             )
 
-        table = table.drop(form.header_colname, axis=1)
+        table = table.drop(form.header_column, axis=1)
         headers = series.astype(str).values
         table.index = headers
     else:

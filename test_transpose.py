@@ -6,7 +6,7 @@ from pandas.testing import assert_frame_equal
 from transpose import Form, render, transpose, MAX_N_COLUMNS
 
 class TransposeTest(unittest.TestCase):
-    def test_with_no_colname(self):
+    def test_with_no_column(self):
         #     A  B  C
         #  0  b  c  d
         #  1  c  d  e
@@ -22,7 +22,7 @@ class TransposeTest(unittest.TestCase):
             'B': ['c', 'd'],
             'C': ['d', 'e'],
         })
-        form = Form.parse(header_colname=None)
+        form = Form.parse(header_column=None)
         result = transpose(table, form)
 
         assert_frame_equal(result, pd.DataFrame({
@@ -32,7 +32,7 @@ class TransposeTest(unittest.TestCase):
         }))
 
 
-    def test_with_header_colname(self):
+    def test_with_header_column(self):
         #     A  B  C
         #  0  b  c  d
         #  1  c  d  e
@@ -48,7 +48,7 @@ class TransposeTest(unittest.TestCase):
             'B': ['c', 'd'],
             'C': ['d', 'e'],
         })
-        form = Form.parse(header_colname='A')
+        form = Form.parse(header_column='A')
         result = transpose(table, form)
 
         assert_frame_equal(result, pd.DataFrame({
@@ -69,7 +69,7 @@ class TransposeTest(unittest.TestCase):
             'A': ['b', 'b'],
             'B': ['c', 'd'],
         })
-        form = Form.parse(header_colname='A', allow_duplicates=False)
+        form = Form.parse(header_column='A', allow_duplicates=False)
         result = transpose(table, form)
 
         self.assertEqual(result, (
@@ -94,7 +94,7 @@ class TransposeTest(unittest.TestCase):
             'B': ['c', 'd'],
             'C': ['d', 'e'],
         })
-        form = Form.parse(header_colname='A', allow_duplicates=True)
+        form = Form.parse(header_column='A', allow_duplicates=True)
         result = transpose(table, form)
 
         assert_frame_equal(result, pd.DataFrame(
@@ -105,7 +105,7 @@ class TransposeTest(unittest.TestCase):
 
     def test_allow_max_n_columns(self):
         table = pd.DataFrame({'A': pd.Series(range(0, MAX_N_COLUMNS))})
-        form = Form.parse(header_colname=None)
+        form = Form.parse(header_column=None)
         result = transpose(table, form)
 
         # Build expected result as a dictionary first
@@ -117,7 +117,7 @@ class TransposeTest(unittest.TestCase):
 
     def test_disallow_past_max_n_columns(self):
         table = pd.DataFrame({'A': pd.Series(range(0, MAX_N_COLUMNS + 1))})
-        form = Form.parse(header_colname=None)
+        form = Form.parse(header_column=None)
         result = transpose(table, form)
 
         # Build expected result as a dictionary first
