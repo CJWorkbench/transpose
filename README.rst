@@ -42,6 +42,6 @@ To add a feature:
 To develop continuously on Workbench:
 
 #. Check this code out in a sibling directory to your checked-out Workbench code
-#. Start Workbench with ``CACHE_MODULES=false bin/dev start``
+#. Start Workbench with ``bin/dev start``
 #. In a separate tab in the Workbench directory, run ``bin/dev develop-module transpose``
 #. Edit this code; the module will be reloaded in Workbench immediately
