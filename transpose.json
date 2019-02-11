@@ -5,5 +5,12 @@
   "icon" : "reshape",
   "description" : "Convert rows to columns and columns to rows",
   "help_url":"modules/clean/transpose",
-  "parameters": []
+  "parameters": [
+  	{
+      "name": "Rename first column",
+      "id_name": "firstcolname",
+      "placeholder":"(optional)",
+      "type": "string"
+	  }
+  ]
 }

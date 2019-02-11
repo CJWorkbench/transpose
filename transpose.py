@@ -4,7 +4,7 @@ from typing import Optional
 MAX_N_COLUMNS = 99
 
 
-def transpose(table):
+def render(table, params):
     warnings = []
 
     if len(table) > MAX_N_COLUMNS:
@@ -20,7 +20,7 @@ def transpose(table):
     if series.duplicated().any():
         # Trust Workbench's sanitizer to rename columns
         warnings.append(
-            f'We renamed some columns because the input column "A" had '
+            f'We renamed some columns because the input column "{column}" had '
             'duplicate values.'
         )
 
@@ -29,9 +29,15 @@ def transpose(table):
     headers[series.isna()] = ''
     table.index = headers
 
+    # The actual transpose
     ret = table.T
-    ret.index.name = 'Column'
-    ret.reset_index(inplace=True)  # Makes 'Column' a column
+ 
+    if 'firstcolname' in params and params['firstcolname'] != '':
+        ret.index.name = params['firstcolname'] # let user rename first column, if desired
+    else:
+        ret.index.name = column    # otherwise name of first column is unchanged
+   
+    ret.reset_index(inplace=True)  # Makes the index (formerly the column names) into a normal column
 
     if warnings:
         return (ret, '\n'.join(warnings))
@@ -39,5 +45,3 @@ def transpose(table):
         return ret
 
 
-def render(table, params):
-    return transpose(table)
