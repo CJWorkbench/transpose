@@ -4,7 +4,12 @@ import datetime
 import unittest
 import pandas as pd
 from pandas.testing import assert_frame_equal
-from transpose import render, MAX_N_COLUMNS
+import transpose
+
+
+def render(table, firstcolname=''):
+    return transpose.render(table, {'firstcolname': firstcolname})
+
 
 class TransposeTest(unittest.TestCase):
     def test_normal(self):
@@ -17,20 +22,18 @@ class TransposeTest(unittest.TestCase):
         #          A  b  c
         #  0       B  c  d
         #  1       C  d  e
-
         table = pd.DataFrame({
             'A': ['b', 'c'],
             'B': ['c', 'd'],
             'C': ['d', 'e'],
         })
-        result = render(table, {'firstcolname':''}) 
+        result = render(table)
 
         assert_frame_equal(result, pd.DataFrame({
             'A': ['B', 'C'],
             'b': ['c', 'd'],
             'c': ['d', 'e'],
         }))
-
 
     def test_rename_first_column(self):
         # As above, but with a user supplied first column name
@@ -40,7 +43,7 @@ class TransposeTest(unittest.TestCase):
             'B': ['c', 'd'],
             'C': ['d', 'e'],
         })
-        result = render(table, {'firstcolname':'Fish'}) 
+        result = render(table, 'Fish')
 
         assert_frame_equal(result, pd.DataFrame({
             'Fish': ['B', 'C'],
@@ -48,21 +51,15 @@ class TransposeTest(unittest.TestCase):
             'c': ['d', 'e'],
         }))
 
-    def test_no_first_column_param(self):
-        # Check operation with previous data version where there was no first col name param
-        # Should keep existing column name
-        table = pd.DataFrame({
-            'A': ['b', 'c'],
-            'B': ['c', 'd'],
-            'C': ['d', 'e'],
-        })
-        result = render(table, {}) 
+    def test_empty_input(self):
+        table = pd.DataFrame()
+        result = render(table)
+        assert_frame_equal(result, pd.DataFrame())
 
-        assert_frame_equal(result, pd.DataFrame({
-            'A': ['B', 'C'],
-            'b': ['c', 'd'],
-            'c': ['d', 'e'],
-        }))        
+    def test_empty_input_with_columns(self):
+        table = pd.DataFrame({'A': [], 'B': []})
+        result = render(table)
+        assert_frame_equal(result, pd.DataFrame({'A': ['B']}))
 
     def test_colnames_to_str(self):
         #     A   B  C
@@ -83,7 +80,7 @@ class TransposeTest(unittest.TestCase):
             'B': ['c', 'd', 'e', 'f'],
             'C': ['d', 'e', 'f', 'g'],
         })
-        result = render(table, {})
+        result = render(table)
 
         assert_frame_equal(result, pd.DataFrame({
             'A': ['B', 'C'],
@@ -92,7 +89,6 @@ class TransposeTest(unittest.TestCase):
             '2018-10-16 12:07:00': ['e', 'f'],
             '': ['f', 'g'],
         }))
-
 
     def test_warn_on_duplicates(self):
         #     A  B  C
@@ -104,53 +100,51 @@ class TransposeTest(unittest.TestCase):
         #     Column  b  b
         #  0       B  c  d
         #  1       C  d  e
-
-
         table = pd.DataFrame({
             'A': ['b', 'b'],
             'B': ['c', 'd'],
             'C': ['d', 'e'],
         })
-        result = render(table, {})
+        result = render(table)
 
         self.assertEqual(result[1], (
             'We renamed some columns because the input column "A" had '
             'duplicate values.'
         ))
         assert_frame_equal(result[0], pd.DataFrame(
-            [[ 'B', 'c', 'd' ],
-             [ 'C', 'd', 'e' ]],
+            [['B', 'c', 'd'],
+             ['C', 'd', 'e']],
             columns=('A', 'b', 'b')
         ))
 
     def test_allow_max_n_columns(self):
         table = pd.DataFrame({
-            'A': pd.Series(range(0, MAX_N_COLUMNS)),
-            'B': pd.Series(range(0, MAX_N_COLUMNS)),
+            'A': pd.Series(range(0, transpose.MAX_N_COLUMNS)),
+            'B': pd.Series(range(0, transpose.MAX_N_COLUMNS)),
         })
-        result = render(table, {})
+        result = render(table)
 
         # Build expected result as a dictionary first
         d = {'A': ['B']}
-        for i in range(0, MAX_N_COLUMNS):
+        for i in range(0, transpose.MAX_N_COLUMNS):
             d[str(i)] = i
 
         assert_frame_equal(result, pd.DataFrame(d))
 
     def test_truncate_past_max_n_columns(self):
         table = pd.DataFrame({
-            'A': pd.Series(range(0, MAX_N_COLUMNS + 1)),
-            'B': pd.Series(range(0, MAX_N_COLUMNS + 1)),
+            'A': pd.Series(range(0, transpose.MAX_N_COLUMNS + 1)),
+            'B': pd.Series(range(0, transpose.MAX_N_COLUMNS + 1)),
         })
-        result = render(table, {})
+        result = render(table)
 
         # Build expected result as a dictionary first
         d = {'A': ['B']}
-        for i in range(0, MAX_N_COLUMNS):
+        for i in range(0, transpose.MAX_N_COLUMNS):
             d[str(i)] = i
 
         self.assertEqual(result[1], (
-            f'We truncated the input to {MAX_N_COLUMNS} rows so the transposed '
-            'table would have a reasonable number of columns.'
+            f'We truncated the input to {transpose.MAX_N_COLUMNS} rows so the '
+            'transposed table would have a reasonable number of columns.'
         ))
         assert_frame_equal(result[0], pd.DataFrame(d))

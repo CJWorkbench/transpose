@@ -1,4 +1,4 @@
-from typing import Optional
+import pandas as pd
 
 
 MAX_N_COLUMNS = 99
@@ -13,6 +13,10 @@ def render(table, params):
             f'We truncated the input to {MAX_N_COLUMNS} rows so the '
             'transposed table would have a reasonable number of columns.'
         )
+
+    if not len(table.columns):
+        # happens if we're the first module in the module stack
+        return pd.DataFrame()
 
     column = table.columns[0]
     series = table[column]
@@ -31,17 +35,16 @@ def render(table, params):
 
     # The actual transpose
     ret = table.T
- 
-    if 'firstcolname' in params and params['firstcolname'] != '':
-        ret.index.name = params['firstcolname'] # let user rename first column, if desired
-    else:
-        ret.index.name = column    # otherwise name of first column is unchanged
-   
-    ret.reset_index(inplace=True)  # Makes the index (formerly the column names) into a normal column
+    # Set the name of the index: it will become the name of the first column.
+    # If user does not supply a name (default), use the input table's first
+    # column.
+    colname = params['firstcolname'].strip() or column
+    ret.index.name = colname
+
+    # Make the index (former colnames) a column
+    ret.reset_index(inplace=True)
 
     if warnings:
         return (ret, '\n'.join(warnings))
     else:
         return ret
-
-
