@@ -9,7 +9,7 @@ from pandas.testing import assert_frame_equal
 import transpose
 
 
-Column = namedtuple('Column', ('name', 'type', 'format'))
+Column = namedtuple('Column', ('name', 'type'))  # transpose ignores 'format'
 
 
 def render(table, firstcolname='', input_columns=None):
@@ -21,8 +21,11 @@ def render(table, firstcolname='', input_columns=None):
         else:
             return 'text'
 
+    def _infer_column(colname):
+        return Column(colname, _infer_type(table[colname]))
+
     if input_columns is None:
-        input_columns = {c: _infer_type(table[c]) for c in table.columns}
+        input_columns = {c: _infer_column(c) for c in table.columns}
 
     return transpose.render(
         table,
@@ -77,7 +80,7 @@ class TransposeTest(unittest.TestCase):
         assert_frame_equal(result, pd.DataFrame())
 
     def test_empty_input_with_columns(self):
-        table = pd.DataFrame({'A': [], 'B': []})
+        table = pd.DataFrame({'A': [], 'B': []}, dtype=object)
         result = render(table)
         assert_frame_equal(result, pd.DataFrame({'A': ['B']}))
 
@@ -96,17 +99,17 @@ class TransposeTest(unittest.TestCase):
 
         dt = datetime.datetime(2018, 10, 16, 12, 7)
         table = pd.DataFrame({
-            'A': ['b', 1, dt, None],
+            'A': [1.1, 2.2, 3.3, None],
             'B': ['c', 'd', 'e', 'f'],
             'C': ['d', 'e', 'f', 'g'],
         })
         result = render(table)
 
-        assert_frame_equal(result, pd.DataFrame({
+        assert_frame_equal(result['dataframe'], pd.DataFrame({
             'A': ['B', 'C'],
-            'b': ['c', 'd'],
-            '1': ['d', 'e'],
-            '2018-10-16 12:07:00': ['e', 'f'],
+            '1.1': ['c', 'd'],
+            '2.2': ['d', 'e'],
+            '3.3': ['e', 'f'],
             '': ['f', 'g'],
         }))
 
@@ -137,36 +140,58 @@ class TransposeTest(unittest.TestCase):
             columns=('A', 'b', 'b')
         ))
 
+    def test_warn_on_convert_to_str_including_column_header(self):
+        table = pd.DataFrame({'A': [1, 2], 'B': ['x', 'y'], 'C': [3, 4]})
+        result = render(table)
+        assert_frame_equal(
+            result['dataframe'],
+            pd.DataFrame({'A': ['B', 'C'], '1': ['x', '3'], '2': ['y', '4']})
+        )
+        self.assertEqual(result['error'], (
+            'Headers in column "A" were auto-converted to text.\n'
+            'Column "C" was auto-converted to Text because all columns must '
+            'have the same type.'
+        ))
+        self.assertEqual(result['quick_fixes'], [{
+            'text': 'Convert "A", "C" to text',
+            'action': 'prependModule',
+            'args': ['converttotext', {'colnames': 'A,C'}],
+        }])
+
     def test_allow_max_n_columns(self):
         table = pd.DataFrame({
-            'A': pd.Series(range(0, transpose.MAX_N_COLUMNS)),
-            'B': pd.Series(range(0, transpose.MAX_N_COLUMNS)),
+            'A': pd.Series([chr(x + 100)
+                            for x in range(transpose.MAX_N_COLUMNS)]),
+            'B': pd.Series([chr(x + 120)
+                            for x in range(transpose.MAX_N_COLUMNS)]),
         })
         result = render(table)
 
         # Build expected result as a dictionary first
         d = {'A': ['B']}
         for i in range(0, transpose.MAX_N_COLUMNS):
-            d[str(i)] = i
+            d[chr(i + 100)] = chr(i + 120)
 
         assert_frame_equal(result, pd.DataFrame(d))
 
     def test_truncate_past_max_n_columns(self):
         table = pd.DataFrame({
-            'A': pd.Series(range(0, transpose.MAX_N_COLUMNS + 1)),
-            'B': pd.Series(range(0, transpose.MAX_N_COLUMNS + 1)),
+            'A': pd.Series([chr(x + 100)
+                            for x in range(transpose.MAX_N_COLUMNS + 1)]),
+            'B': pd.Series([chr(x + 123)
+                            for x in range(transpose.MAX_N_COLUMNS + 1)]),
         })
         result = render(table)
-
-        # Build expected result as a dictionary first
-        d = {'A': ['B']}
-        for i in range(0, transpose.MAX_N_COLUMNS):
-            d[str(i)] = i
 
         self.assertEqual(result[1], (
             f'We truncated the input to {transpose.MAX_N_COLUMNS} rows so the '
             'transposed table would have a reasonable number of columns.'
         ))
+        # Build expected result as a dictionary first
+        d = {'A': ['B']}
+        for i in range(transpose.MAX_N_COLUMNS):
+            d[chr(i + 100)] = chr(i + 123)
+
         assert_frame_equal(result[0], pd.DataFrame(d))
 
 
