@@ -1,0 +1,11 @@
+id_name: transpose
+name: Transpose
+category: Clean
+icon: reshape
+description: Convert rows to columns and columns to rows.
+help_url: modules/clean/transpose
+parameters:
+- id_name: firstcolname
+  type: string
+  name: Rename first column
+  placeholder: '(optional)'
