@@ -4,7 +4,7 @@ import pandas as pd
 MAX_N_COLUMNS = 99
 
 
-def render(table, params):
+def render(table, params, *, input_columns):
     warnings = []
 
     if len(table) > MAX_N_COLUMNS:

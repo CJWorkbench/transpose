@@ -1,14 +1,34 @@
 #!/usr/bin/env python3
 
+from collections import namedtuple
 import datetime
 import unittest
 import pandas as pd
+from pandas.api.types import is_numeric_dtype, is_datetime64_dtype
 from pandas.testing import assert_frame_equal
 import transpose
 
 
-def render(table, firstcolname=''):
-    return transpose.render(table, {'firstcolname': firstcolname})
+Column = namedtuple('Column', ('name', 'type', 'format'))
+
+
+def render(table, firstcolname='', input_columns=None):
+    def _infer_type(series):
+        if is_numeric_dtype(series):
+            return 'number'
+        elif is_datetime64_dtype(series):
+            return 'datetime'
+        else:
+            return 'text'
+
+    if input_columns is None:
+        input_columns = {c: _infer_type(table[c]) for c in table.columns}
+
+    return transpose.render(
+        table,
+        {'firstcolname': firstcolname},
+        input_columns=input_columns
+    )
 
 
 class TransposeTest(unittest.TestCase):
@@ -148,3 +168,7 @@ class TransposeTest(unittest.TestCase):
             'transposed table would have a reasonable number of columns.'
         ))
         assert_frame_equal(result[0], pd.DataFrame(d))
+
+
+if __name__ == '__main__':
+    unittest.main()
