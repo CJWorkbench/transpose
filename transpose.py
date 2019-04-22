@@ -37,7 +37,7 @@ def render(table, params, *, input_columns):
     colnames_auto_converted_to_text = []
 
     if len(table) > MAX_N_COLUMNS:
-        table = table[0:MAX_N_COLUMNS]
+        table = table.truncate(after=MAX_N_COLUMNS - 1)
         warnings.append(
             f'We truncated the input to {MAX_N_COLUMNS} rows so the '
             'transposed table would have a reasonable number of columns.'
