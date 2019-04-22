@@ -113,7 +113,7 @@ class TransposeTest(unittest.TestCase):
             '': ['f', 'g'],
         }))
 
-    def test_warn_on_duplicates(self):
+    def test_warn_and_rename_on_duplicates(self):
         #     A  B  C
         #  0  b  c  d
         #  1  b  d  e
@@ -134,11 +134,11 @@ class TransposeTest(unittest.TestCase):
             'We renamed some columns because the input column "A" had '
             'duplicate values.'
         ))
-        assert_frame_equal(result[0], pd.DataFrame(
-            [['B', 'c', 'd'],
-             ['C', 'd', 'e']],
-            columns=('A', 'b', 'b')
-        ))
+        assert_frame_equal(result[0], pd.DataFrame({
+            'A': ['B', 'C'],
+            'b': ['c', 'd'],
+            'b 1': ['d', 'e'],
+        }))
 
     def test_warn_on_convert_to_str_including_column_header(self):
         table = pd.DataFrame({'A': [1, 2], 'B': ['x', 'y'], 'C': [3, 4]})
@@ -176,9 +176,9 @@ class TransposeTest(unittest.TestCase):
 
     def test_truncate_past_max_n_columns(self):
         table = pd.DataFrame({
-            'A': pd.Series([chr(x + 100)
+            'A': pd.Series([str(x)
                             for x in range(transpose.MAX_N_COLUMNS + 1)]),
-            'B': pd.Series([chr(x + 123)
+            'B': pd.Series([str(x + 1000)
                             for x in range(transpose.MAX_N_COLUMNS + 1)]),
         })
         result = render(table)
@@ -190,9 +190,43 @@ class TransposeTest(unittest.TestCase):
         # Build expected result as a dictionary first
         d = {'A': ['B']}
         for i in range(transpose.MAX_N_COLUMNS):
-            d[chr(i + 100)] = chr(i + 123)
+            d[str(i)] = str(i + 1000)
 
         assert_frame_equal(result[0], pd.DataFrame(d))
+
+    def test_transpose_categorical_and_rename_index(self):
+        # Avoid TypeError: cannot insert an item into a CategoricalIndex
+        # that is not already an existing category
+        #
+        # Akin to https://github.com/pandas-dev/pandas/issues/19136
+        #
+        # Column names should strings, not a CategoricalIndex.
+        table = pd.DataFrame({
+            'A': pd.Series(['a1', 'a2'], dtype='category'),  # becomes ret.columns
+            'B': pd.Series(['b1', 'b2']),
+        })
+        result = render(table, firstcolname='X')
+        assert_frame_equal(result, pd.DataFrame({
+            'X': ['B'],
+            'a1': ['b1'],
+            'a2': ['b2'],
+        }))
+
+    def test_warn_and_rename_column_if_firstcolname_conflicts(self):
+        table = pd.DataFrame({
+            'X': ['B', 'C'],
+            'A': ['c', 'd'],
+        })
+        result = render(table, firstcolname='B')
+        self.assertEqual(result[1], (
+            'We renamed some columns because the input column "X" had '
+            'duplicate values.'
+        ))
+        assert_frame_equal(result[0], pd.DataFrame({
+            'B': ['A'],
+            'B 1': ['c'],
+            'C': ['d'],
+        }))
 
 
 if __name__ == '__main__':

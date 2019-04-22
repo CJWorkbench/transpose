@@ -1,8 +1,35 @@
 import numpy as np
 import pandas as pd
+from typing import Iterator, Set
 
 
 MAX_N_COLUMNS = 99
+
+
+def _uniquize_colnames(colnames: Iterator[str],
+                       never_rename_to: Set[str]) -> Iterator[str]:
+    """
+    Rename columns to prevent duplicates.
+
+    The algorithm: iterate over each `colname` and add to an internal "seen".
+    When we encounter a colname we've seen, append " 1", " 2", " 3", etc. to it
+    until we encounter a colname we've never seen that is not in
+    `never_rename_to`.
+    """
+    seen = set()
+    for colname in colnames:
+        if colname in seen:
+            for i in range(1, 999999):
+                try_colname = f'{colname} {i}'
+                if (
+                    try_colname not in seen
+                    and try_colname not in never_rename_to
+                ):
+                    colname = try_colname
+                    break
+
+        seen.add(colname)
+        yield colname
 
 
 def render(table, params, *, input_columns):
@@ -20,27 +47,39 @@ def render(table, params, *, input_columns):
         # happens if we're the first module in the module stack
         return pd.DataFrame()
 
-    column = table.columns[0]
-    series = table[column]
+    # If user does not supply a name (default), use the input table's first
+    # column name as the output table's first column name.
+    first_colname = params['firstcolname'].strip() or table.columns[0]
 
+    column = table.columns[0]
+    headers_series = table[column]
+    table.drop(column, axis=1, inplace=True)
+
+    # Ensure headers are string. (They will become column names.)
     if input_columns[column].type != 'text':
         warnings.append(f'Headers in column "A" were auto-converted to text.')
         colnames_auto_converted_to_text.append(column)
-        headers = series.astype(str)
-        headers[series.isna()] = ''
-        headers[headers.isna()] = ''
-    else:
-        headers = series
+    # Regardless of column type, we want to convert to str. This catches lots
+    # of issues:
+    #
+    # * Column names shouldn't be a CategoricalIndex; that would break other
+    #   Pandas functions. See https://github.com/pandas-dev/pandas/issues/19136
+    # * nulls should be converted to '' instead of 'nan'
+    # * Non-str should be converted to str
+    headers = ['' if pd.isnull(x) else str(x) for x in headers_series]
+    # When forcing header uniqueness, consider first_colname.
+    headers.insert(0, first_colname)
 
-    if headers.duplicated().any():
-        # Trust Workbench's sanitizer to rename columns
+    unique_headers = set(headers)
+
+    if len(headers) != len(unique_headers):
+        headers = list(_uniquize_colnames(headers, unique_headers))
         warnings.append(
             f'We renamed some columns because the input column "{column}" had '
             'duplicate values.'
         )
 
-    table = table.drop(column, axis=1)
-    table.index = headers.values
+    table.index = headers[1:]
 
     input_types = set(c.type
                       for c in input_columns.values()
@@ -70,11 +109,7 @@ def render(table, params, *, input_columns):
     # The actual transpose
     ret = table.T
     # Set the name of the index: it will become the name of the first column.
-    # If user does not supply a name (default), use the input table's first
-    # column.
-    colname = params['firstcolname'].strip() or column
-    ret.index.name = colname
-
+    ret.index.name = first_colname
     # Make the index (former colnames) a column
     ret.reset_index(inplace=True)
 

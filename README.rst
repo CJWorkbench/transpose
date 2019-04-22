@@ -11,18 +11,15 @@ Features
 * Throws an error on duplicate column names by default. The user may override
   the error.
 * Limits the output table to 1,000 columns.
+* Warns and converts all output to str if input has mixed types.
+* Converts output column names to text, even if the first column is int.
 
 Missing Features
 ----------------
 
-* Transposed values will have mixed types, if input columns aren't all of the
-  same type. Assume Workbench will sanitize this by converting everything to
-  text; there is no way to control the format of said text. Workaround: the
-  user can convert everything to text before transposing.
-* Output column headers will be text. If the user chose a column-header column
-  of another type, it will be converted to text but there is no way to control
-  the format of said text. Workaround: the user can convert the column-header
-  column to text before transposing.
+* Type conversion does not respect column formats. (It just uses ``str()``.)
+  A warning lets the user prepend a "Convert to Text" module to correct any
+  errors.
 
 Developing
 ----------
