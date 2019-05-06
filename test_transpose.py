@@ -3,6 +3,7 @@
 from collections import namedtuple
 import datetime
 import unittest
+import numpy as np
 import pandas as pd
 from pandas.api.types import is_numeric_dtype, is_datetime64_dtype
 from pandas.testing import assert_frame_equal
@@ -93,9 +94,9 @@ class TransposeTest(unittest.TestCase):
         #
         # Transposed (with A as headers) becomes:
         #
-        #     Column  b  1  dt  ''
-        #  0       B  c  d   e   f
-        #  1       C  d  e   f   g
+        #     Column  b  1  dt  unnamed
+        #  0       B  c  d   e        f
+        #  1       C  d  e   f        g
 
         dt = datetime.datetime(2018, 10, 16, 12, 7)
         table = pd.DataFrame({
@@ -110,7 +111,7 @@ class TransposeTest(unittest.TestCase):
             '1.1': ['c', 'd'],
             '2.2': ['d', 'e'],
             '3.3': ['e', 'f'],
-            '': ['f', 'g'],
+            'unnamed': ['f', 'g'],
         }))
 
     def test_warn_and_rename_on_duplicates(self):
@@ -138,6 +139,22 @@ class TransposeTest(unittest.TestCase):
             'A': ['B', 'C'],
             'b': ['c', 'd'],
             'b 1': ['d', 'e'],
+        }))
+
+    def test_warn_and_rename_on_empty_and_unnamed_colname(self):
+        table = pd.DataFrame({'A': ['x', '', 'unnamed', np.nan],
+                              'B': ['b1', 'b2', 'b3', 'b4']})
+        result = render(table)
+        self.assertEqual(result[1], (
+            'We renamed some columns because the input column "A" had '
+            'empty values.'
+        ))
+        assert_frame_equal(result[0], pd.DataFrame({
+            'A': ['B'],
+            'x': ['b1'],
+            'unnamed 1': ['b2'],
+            'unnamed': ['b3'],
+            'unnamed 2': ['b4'],
         }))
 
     def test_warn_on_convert_to_str_including_column_header(self):

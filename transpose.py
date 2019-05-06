@@ -9,7 +9,7 @@ MAX_N_COLUMNS = 99
 def _uniquize_colnames(colnames: Iterator[str],
                        never_rename_to: Set[str]) -> Iterator[str]:
     """
-    Rename columns to prevent duplicates.
+    Rename columns to prevent duplicates or empty column names.
 
     The algorithm: iterate over each `colname` and add to an internal "seen".
     When we encounter a colname we've seen, append " 1", " 2", " 3", etc. to it
@@ -18,7 +18,11 @@ def _uniquize_colnames(colnames: Iterator[str],
     """
     seen = set()
     for colname in colnames:
-        if colname in seen:
+        force_add_number = False
+        if not colname:
+            colname = 'unnamed'
+            force_add_number = 'unnamed' in never_rename_to
+        if colname in seen or force_add_number:
             for i in range(1, 999999):
                 try_colname = f'{colname} {i}'
                 if (
@@ -59,6 +63,7 @@ def render(table, params, *, input_columns):
     if input_columns[column].type != 'text':
         warnings.append(f'Headers in column "A" were auto-converted to text.')
         colnames_auto_converted_to_text.append(column)
+
     # Regardless of column type, we want to convert to str. This catches lots
     # of issues:
     #
@@ -66,18 +71,35 @@ def render(table, params, *, input_columns):
     #   Pandas functions. See https://github.com/pandas-dev/pandas/issues/19136
     # * nulls should be converted to '' instead of 'nan'
     # * Non-str should be converted to str
-    headers = ['' if pd.isnull(x) else str(x) for x in headers_series]
-    # When forcing header uniqueness, consider first_colname.
+    # * `first_colname` will be the first element (so we can enforce its
+    #   uniqueness).
+    #
+    # After this step, `headers` will be a List[str]. "" is okay for now: we'll
+    # catch that later.
+    na = headers_series.isna()
+    headers_series = headers_series.astype(str)
+    headers_series[na] = ''  # Empty values are all equivalent
+    headers_series[headers_series.isna()] = ''
+    headers = headers_series.tolist()
     headers.insert(0, first_colname)
+    non_empty_headers = [h for h in headers if h]
 
+    # unique_headers: all the "valuable" header names -- the ones we won't
+    # rename any duplicate/empty headers to.
     unique_headers = set(headers)
 
-    if len(headers) != len(unique_headers):
-        headers = list(_uniquize_colnames(headers, unique_headers))
+    if '' in unique_headers:
+        warnings.append(
+            f'We renamed some columns because the input column "{column}" had '
+            'empty values.'
+        )
+    if len(non_empty_headers) != len(unique_headers - set([''])):
         warnings.append(
             f'We renamed some columns because the input column "{column}" had '
             'duplicate values.'
         )
+
+    headers = list(_uniquize_colnames(headers, unique_headers))
 
     table.index = headers[1:]
 
