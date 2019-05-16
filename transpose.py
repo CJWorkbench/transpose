@@ -145,7 +145,7 @@ def render(table, params, *, input_columns):
                 'action': 'prependModule',
                 'args': [
                     'converttotext',
-                    {'colnames': ','.join(colnames_auto_converted_to_text)},
+                    {'colnames': colnames_auto_converted_to_text},
                 ],
             }]
         }

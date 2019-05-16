@@ -172,7 +172,7 @@ class TransposeTest(unittest.TestCase):
         self.assertEqual(result['quick_fixes'], [{
             'text': 'Convert "A", "C" to text',
             'action': 'prependModule',
-            'args': ['converttotext', {'colnames': 'A,C'}],
+            'args': ['converttotext', {'colnames': ['A', 'C']}],
         }])
 
     def test_allow_max_n_columns(self):
