@@ -113,7 +113,7 @@ class RenderTest(unittest.TestCase):
                     "1.1": ["c", "d"],
                     "2.2": ["d", "e"],
                     "3.3": ["e", "f"],
-                    "unnamed": ["f", "g"],
+                    "Column 5": ["f", "g"],
                 }
             ),
         )
@@ -131,28 +131,24 @@ class RenderTest(unittest.TestCase):
         table = pd.DataFrame({"A": ["b", "b"], "B": ["c", "d"], "C": ["d", "e"]})
         result = render(table)
 
-        self.assertEqual(
-            result[1],
-            (
-                'We renamed some columns because the input column "A" had '
-                "duplicate values."
-            ),
-        )
+        self.assertEqual(result[1], "Renamed 1 duplicate column names (see “b 2”)")
         assert_frame_equal(
             result[0],
-            pd.DataFrame({"A": ["B", "C"], "b": ["c", "d"], "b 1": ["d", "e"]}),
+            pd.DataFrame({"A": ["B", "C"], "b": ["c", "d"], "b 2": ["d", "e"]}),
         )
 
     def test_warn_and_rename_on_empty_and_unnamed_colname(self):
         table = pd.DataFrame(
-            {"A": ["x", "", "unnamed", np.nan], "B": ["b1", "b2", "b3", "b4"]}
+            {"A": ["x", "", "Column 3", np.nan], "B": ["b1", "b2", "b3", "b4"]}
         )
         result = render(table)
         self.assertEqual(
             result[1],
-            (
-                'We renamed some columns because the input column "A" had '
-                "empty values."
+            "\n".join(
+                [
+                    "Renamed 2 column names (because values were empty; see “Column 4”)",
+                    "Renamed 1 duplicate column names (see “Column 4”)",
+                ]
             ),
         )
         assert_frame_equal(
@@ -161,9 +157,9 @@ class RenderTest(unittest.TestCase):
                 {
                     "A": ["B"],
                     "x": ["b1"],
-                    "unnamed 1": ["b2"],
-                    "unnamed": ["b3"],
-                    "unnamed 2": ["b4"],
+                    "Column 4": ["b2"],
+                    "Column 3": ["b3"],
+                    "Column 5": ["b4"],
                 }
             ),
         )
@@ -197,15 +193,25 @@ class RenderTest(unittest.TestCase):
     def test_allow_max_n_columns(self):
         table = pd.DataFrame(
             {
-                "A": pd.Series([chr(x + 100) for x in range(transpose.MAX_N_COLUMNS)]),
-                "B": pd.Series([chr(x + 120) for x in range(transpose.MAX_N_COLUMNS)]),
+                "A": pd.Series(
+                    [
+                        chr(x + 100)
+                        for x in range(transpose.settings.MAX_COLUMNS_PER_TABLE)
+                    ]
+                ),
+                "B": pd.Series(
+                    [
+                        chr(x + 120)
+                        for x in range(transpose.settings.MAX_COLUMNS_PER_TABLE)
+                    ]
+                ),
             }
         )
         result = render(table)
 
         # Build expected result as a dictionary first
         d = {"A": ["B"]}
-        for i in range(0, transpose.MAX_N_COLUMNS):
+        for i in range(0, transpose.settings.MAX_COLUMNS_PER_TABLE):
             d[chr(i + 100)] = chr(i + 120)
 
         assert_frame_equal(result, pd.DataFrame(d))
@@ -213,9 +219,17 @@ class RenderTest(unittest.TestCase):
     def test_truncate_past_max_n_columns(self):
         table = pd.DataFrame(
             {
-                "A": pd.Series([str(x) for x in range(transpose.MAX_N_COLUMNS + 1)]),
+                "A": pd.Series(
+                    [
+                        str(x)
+                        for x in range(transpose.settings.MAX_COLUMNS_PER_TABLE + 1)
+                    ]
+                ),
                 "B": pd.Series(
-                    [str(x + 1000) for x in range(transpose.MAX_N_COLUMNS + 1)]
+                    [
+                        str(x + 1000)
+                        for x in range(transpose.settings.MAX_COLUMNS_PER_TABLE + 1)
+                    ]
                 ),
             }
         )
@@ -224,13 +238,13 @@ class RenderTest(unittest.TestCase):
         self.assertEqual(
             result[1],
             (
-                f"We truncated the input to {transpose.MAX_N_COLUMNS} rows so the "
+                f"We truncated the input to {transpose.settings.MAX_COLUMNS_PER_TABLE} rows so the "
                 "transposed table would have a reasonable number of columns."
             ),
         )
         # Build expected result as a dictionary first
         d = {"A": ["B"]}
-        for i in range(transpose.MAX_N_COLUMNS):
+        for i in range(transpose.settings.MAX_COLUMNS_PER_TABLE):
             d[str(i)] = str(i + 1000)
 
         assert_frame_equal(result[0], pd.DataFrame(d))
@@ -256,15 +270,9 @@ class RenderTest(unittest.TestCase):
     def test_warn_and_rename_column_if_firstcolname_conflicts(self):
         table = pd.DataFrame({"X": ["B", "C"], "A": ["c", "d"]})
         result = render(table, firstcolname="B")
-        self.assertEqual(
-            result[1],
-            (
-                'We renamed some columns because the input column "X" had '
-                "duplicate values."
-            ),
-        )
+        self.assertEqual(result[1], "Renamed 1 duplicate column names (see “B 2”)")
         assert_frame_equal(
-            result[0], pd.DataFrame({"B": ["A"], "B 1": ["c"], "C": ["d"]})
+            result[0], pd.DataFrame({"B": ["A"], "B 2": ["c"], "C": ["d"]})
         )
 
 
