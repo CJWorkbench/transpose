@@ -1,0 +1,61 @@
+#. default-message: Transpose
+msgid "_spec.name"
+msgstr ""
+
+#. default-message: Convert rows to columns and columns to rows.
+msgid "_spec.description"
+msgstr ""
+
+#. default-message: Rename first column
+msgid "_spec.parameters.firstcolname.name"
+msgstr ""
+
+#. default-message: (optional)
+msgid "_spec.parameters.firstcolname.placeholder"
+msgstr ""
+
+#. default-message: Removed special characters from {n_columns, plural, other{# column names (see “{column_name}”)} one{column name “{column_name}”}}
+#: transpose.py:79
+msgid "warnings.removedSpecialCharactersFromColumnNames"
+msgstr ""
+
+#. default-message: {n_columns, plural, other{Renamed # column names because values were empty (see “{column_name}”)} one{Renamed column name “{column_name}” because value was empty}}
+#: transpose.py:91
+msgid "warnings.renamedEmptyColumnNames"
+msgstr ""
+
+#. default-message: {n_columns, plural, other{Truncated # column names to {n_bytes} bytes each (see “{column_name}”)} one{Truncated column name “{column_name}” to {n_bytes} bytes}}
+#: transpose.py:102
+msgid "warnings.truncatedColumnNames"
+msgstr ""
+
+#. default-message: {n_columns, plural, other{Renamed # duplicate column names (see “{column_name}”)} one{Renamed duplicate column name “{column_name}”}}
+#: transpose.py:113
+msgid "warnings.renamedDuplicateColumnNames"
+msgstr ""
+
+#. default-message: We truncated the input to {max_columns} rows so the transposed table would have a reasonable number of columns.
+#: transpose.py:132
+msgid "warnings.tooManyRows"
+msgstr ""
+
+#. default-message: Headers in column "{column_name}" were auto-converted to text.
+#: transpose.py:149
+msgid "headersConvertedToText.error"
+msgstr ""
+
+#. default-message: Convert {column_name} to text
+#: transpose.py:156
+msgid "headersConvertedToText.quick_fix.text"
+msgstr ""
+
+#. default-message: {n_columns, plural, other {Columns {column_names} were} one {Column {column_names} was}} auto-converted to Text because all columns must have the same type.
+#: transpose.py:193
+msgid "differentColumnTypes.error"
+msgstr ""
+
+#. default-message: Convert {column_names} to text
+#: transpose.py:199
+msgid "warnings.differentColumnTypes.quick_fix.text"
+msgstr ""
+

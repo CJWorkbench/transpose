@@ -3,6 +3,7 @@ import numpy as np
 import pandas as pd
 from cjwmodule.util.colnames import gen_unique_clean_colnames
 from typing import Iterator, List, Set
+from cjwmodule import i18n
 
 
 # hard-code settings for now. TODO have Workbench pass render(..., settings=...)
@@ -75,23 +76,48 @@ def _gen_colnames_and_warn(
     warnings = []
     if n_ascii_cleaned > 0:
         warnings.append(
-            "Removed special characters from %d column names (see “%s”)"
-            % (n_ascii_cleaned, first_ascii_cleaned)
+            i18n.trans(
+                "warnings.removedSpecialCharactersFromColumnNames",
+                "Removed special characters from "
+                "{n_columns, plural,"
+                " other{# column names (see “{column_name}”)}"
+                " one{column name “{column_name}”}"
+                "}",
+                {"n_columns": n_ascii_cleaned, "column_name": first_ascii_cleaned}
+            )
         )
     if n_default > 0:
         warnings.append(
-            "Renamed %d column names (because values were empty; see “%s”)"
-            % (n_default, first_default)
+            i18n.trans(
+                "warnings.renamedEmptyColumnNames",
+                "{n_columns, plural,"
+                " other{Renamed # column names because values were empty (see “{column_name}”)}"
+                " one{Renamed column name “{column_name}” because value was empty}"
+                "}",
+                {"n_columns": n_default, "column_name": first_default}
+            )
         )
     if n_truncated > 0:
         warnings.append(
-            "Truncated %d column names (to %d bytes each; see “%s”)"
-            % (n_truncated, settings.MAX_BYTES_PER_COLUMN_NAME, first_truncated)
+            i18n.trans(
+                "warnings.truncatedColumnNames",
+                "{n_columns, plural,"
+                " other{Truncated # column names to {n_bytes} bytes each (see “{column_name}”)}"
+                " one{Truncated column name “{column_name}” to {n_bytes} bytes}"
+                "}",
+                {"n_columns": n_truncated, "column_name": first_truncated, "n_bytes": settings.MAX_BYTES_PER_COLUMN_NAME}
+            )
         )
     if n_numbered > 0:
         warnings.append(
-            "Renamed %d duplicate column names (see “%s”)"
-            % (n_numbered, first_numbered)
+            i18n.trans(
+                "warnings.renamedDuplicateColumnNames",
+                "{n_columns, plural,"
+                " other{Renamed # duplicate column names (see “{column_name}”)}"
+                " one{Renamed duplicate column name “{column_name}”}"
+                "}",
+                {"n_columns": n_numbered, "column_name": first_numbered}
+            )
         )
 
     return GenColnamesResult(names, warnings)
@@ -103,10 +129,12 @@ def render(table, params, *, input_columns):
 
     if len(table) > settings.MAX_COLUMNS_PER_TABLE:
         table = table.truncate(after=settings.MAX_COLUMNS_PER_TABLE - 1)
-        warnings.append(
-            f"We truncated the input to {settings.MAX_COLUMNS_PER_TABLE} rows so the "
-            "transposed table would have a reasonable number of columns."
-        )
+        warnings.append(i18n.trans(
+            "warnings.tooManyRows",
+            "We truncated the input to {max_columns} rows so the "
+            "transposed table would have a reasonable number of columns.",
+            {"max_columns": settings.MAX_COLUMNS_PER_TABLE}
+        ))
 
     if not len(table.columns):
         # happens if we're the first module in the module stack
@@ -117,8 +145,27 @@ def render(table, params, *, input_columns):
     table.drop(column, axis=1, inplace=True)
 
     if input_columns[column].type != "text":
-        warnings.append(f'Headers in column "A" were auto-converted to text.')
-        colnames_auto_converted_to_text.append(column)
+        warnings.append({
+            "message": i18n.trans(
+                "headersConvertedToText.error",
+                'Headers in column "{column_name}" were auto-converted to text.',
+                {"column_name": column}
+            ),
+            "quickFixes": [
+                {
+                    "text": i18n.trans(
+                        "headersConvertedToText.quick_fix.text",
+                        "Convert {column_name} to text",
+                        {"column_name": '"%s"' % column}
+                    ),
+                    "action": "prependModule",
+                    "args": [
+                        "converttotext",
+                        {"colnames": [column]},
+                    ],
+                }
+            ]
+        })
 
     # Ensure headers are string. (They will become column names.)
     # * categorical => str
@@ -136,16 +183,32 @@ def render(table, params, *, input_columns):
         # Convert everything to text before converting. (All values must have
         # the same type.)
         to_convert = [c for c in table.columns if input_columns[c].type != "text"]
-        colnames_auto_converted_to_text.extend(to_convert)
-        if len(to_convert) == 1:
-            start = f'Column "{to_convert[0]}" was'
-        else:
-            colnames = ", ".join(f'"{c}"' for c in to_convert)
-            start = f"Columns {colnames} were"
-        warnings.append(
-            f"{start} auto-converted to Text because all columns must have "
-            "the same type."
-        )
+        cols_str = ", ".join(f'"{c}"' for c in to_convert)
+        warnings.append({
+            "message": i18n.trans(
+                "differentColumnTypes.error",
+                "{n_columns, plural, other {Columns {column_names} were} one {Column {column_names} was}} "
+                "auto-converted to Text because all columns must have the same type.",
+                {
+                    "n_columns": len(to_convert),
+                    "column_names": cols_str
+                }
+            ),
+            "quickFixes":[
+                {
+                    "text": i18n.trans(
+                        "warnings.differentColumnTypes.quick_fix.text",
+                        "Convert {column_names} to text",
+                        {"column_names": cols_str}
+                    ),
+                    "action": "prependModule",
+                    "args": [
+                        "converttotext",
+                        {"colnames": to_convert},
+                    ],
+                }
+            ]
+        })
 
         for colname in to_convert:
             # TODO respect column formats ... and nix the quick-fix?
@@ -161,24 +224,8 @@ def render(table, params, *, input_columns):
     # Make the index (former colnames) a column
     ret.reset_index(inplace=True)
 
-    if warnings and colnames_auto_converted_to_text:
-        colnames = ", ".join(f'"{c}"' for c in colnames_auto_converted_to_text)
-        return {
-            "dataframe": ret,
-            "error": "\n".join(warnings),
-            "quick_fixes": [
-                {
-                    "text": f"Convert {colnames} to text",
-                    "action": "prependModule",
-                    "args": [
-                        "converttotext",
-                        {"colnames": colnames_auto_converted_to_text},
-                    ],
-                }
-            ],
-        }
     if warnings:
-        return (ret, "\n".join(warnings))
+        return (ret, warnings)
     else:
         return ret
 

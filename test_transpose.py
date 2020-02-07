@@ -8,6 +8,7 @@ import pandas as pd
 from pandas.api.types import is_numeric_dtype, is_datetime64_dtype
 from pandas.testing import assert_frame_equal
 import transpose
+from cjwmodule.testing.i18n import i18n_message
 
 
 Column = namedtuple("Column", ("name", "type"))  # transpose ignores 'format'
@@ -106,7 +107,7 @@ class RenderTest(unittest.TestCase):
         result = render(table)
 
         assert_frame_equal(
-            result["dataframe"],
+            result[0],
             pd.DataFrame(
                 {
                     "A": ["B", "C"],
@@ -131,7 +132,13 @@ class RenderTest(unittest.TestCase):
         table = pd.DataFrame({"A": ["b", "b"], "B": ["c", "d"], "C": ["d", "e"]})
         result = render(table)
 
-        self.assertEqual(result[1], "Renamed 1 duplicate column names (see “b 2”)")
+        self.assertEqual(
+            result[1], 
+            [i18n_message(
+                "warnings.renamedDuplicateColumnNames",
+                {"n_columns": 1, "column_name": "b 2"}
+            )]
+        )
         assert_frame_equal(
             result[0],
             pd.DataFrame({"A": ["B", "C"], "b": ["c", "d"], "b 2": ["d", "e"]}),
@@ -144,12 +151,16 @@ class RenderTest(unittest.TestCase):
         result = render(table)
         self.assertEqual(
             result[1],
-            "\n".join(
-                [
-                    "Renamed 2 column names (because values were empty; see “Column 4”)",
-                    "Renamed 1 duplicate column names (see “Column 4”)",
-                ]
-            ),
+            [
+                i18n_message(
+                    "warnings.renamedEmptyColumnNames",
+                    {"n_columns": 2, "column_name": "Column 4"}
+                ),
+                i18n_message(
+                    "warnings.renamedDuplicateColumnNames",
+                    {"n_columns": 1, "column_name": "Column 4"}
+                )
+            ]
         )
         assert_frame_equal(
             result[0],
@@ -168,26 +179,48 @@ class RenderTest(unittest.TestCase):
         table = pd.DataFrame({"A": [1, 2], "B": ["x", "y"], "C": [3, 4]})
         result = render(table)
         assert_frame_equal(
-            result["dataframe"],
+            result[0],
             pd.DataFrame({"A": ["B", "C"], "1": ["x", "3"], "2": ["y", "4"]}),
         )
         self.assertEqual(
-            result["error"],
-            (
-                'Headers in column "A" were auto-converted to text.\n'
-                'Column "C" was auto-converted to Text because all columns must '
-                "have the same type."
-            ),
-        )
-        self.assertEqual(
-            result["quick_fixes"],
+            result[1],
             [
                 {
-                    "text": 'Convert "A", "C" to text',
-                    "action": "prependModule",
-                    "args": ["converttotext", {"colnames": ["A", "C"]}],
+                    "message": i18n_message(
+                        "headersConvertedToText.error",
+                        {"column_name": 'A'}
+                    ),
+                    "quickFixes":[
+                        {
+                            "text": i18n_message(
+                                "headersConvertedToText.quick_fix.text",
+                                {"column_name": '"A"'}
+                            ),
+                            "action": "prependModule",
+                            "args": ["converttotext", {"colnames": ["A"]}],
+                        }
+                    ]
+                },
+                {
+                    "message": i18n_message(
+                        "differentColumnTypes.error",
+                        {
+                            "n_columns": 1,
+                            "column_names": '"C"'
+                        }
+                    ),
+                    "quickFixes":[
+                        {
+                            "text": i18n_message(
+                                "warnings.differentColumnTypes.quick_fix.text",
+                                {"column_names": '"C"'}
+                            ),
+                            "action": "prependModule",
+                            "args": ["converttotext", {"colnames": ["C"]}],
+                        }
+                    ]
                 }
-            ],
+            ]
         )
 
     def test_allow_max_n_columns(self):
@@ -237,10 +270,10 @@ class RenderTest(unittest.TestCase):
 
         self.assertEqual(
             result[1],
-            (
-                f"We truncated the input to {transpose.settings.MAX_COLUMNS_PER_TABLE} rows so the "
-                "transposed table would have a reasonable number of columns."
-            ),
+            [i18n_message(
+                "warnings.tooManyRows",
+                {"max_columns": transpose.settings.MAX_COLUMNS_PER_TABLE}
+            )],
         )
         # Build expected result as a dictionary first
         d = {"A": ["B"]}
@@ -270,7 +303,10 @@ class RenderTest(unittest.TestCase):
     def test_warn_and_rename_column_if_firstcolname_conflicts(self):
         table = pd.DataFrame({"X": ["B", "C"], "A": ["c", "d"]})
         result = render(table, firstcolname="B")
-        self.assertEqual(result[1], "Renamed 1 duplicate column names (see “B 2”)")
+        self.assertEqual(result[1], [i18n_message(
+            "warnings.renamedDuplicateColumnNames",
+            {"n_columns": 1, "column_name": "B 2"}
+        )])
         assert_frame_equal(
             result[0], pd.DataFrame({"B": ["A"], "B 2": ["c"], "C": ["d"]})
         )

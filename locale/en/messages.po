@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2020-01-07 06:46+0000\n"
+"POT-Creation-Date: 2020-02-07 19:43+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en\n"
@@ -17,7 +17,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel 2.7.0\n"
+"Generated-By: Babel 2.8.0\n"
 
 msgid "_spec.name"
 msgstr "Transpose"
@@ -30,4 +30,55 @@ msgstr "Rename first column"
 
 msgid "_spec.parameters.firstcolname.placeholder"
 msgstr "(optional)"
+
+#: transpose.py:79
+msgid "warnings.removedSpecialCharactersFromColumnNames"
+msgstr ""
+"Removed special characters from {n_columns, plural, other{# column names "
+"(see “{column_name}”)} one{column name “{column_name}”}}"
+
+#: transpose.py:91
+msgid "warnings.renamedEmptyColumnNames"
+msgstr ""
+"{n_columns, plural, other{Renamed # column names because values were "
+"empty (see “{column_name}”)} one{Renamed column name “{column_name}” "
+"because value was empty}}"
+
+#: transpose.py:102
+msgid "warnings.truncatedColumnNames"
+msgstr ""
+"{n_columns, plural, other{Truncated # column names to {n_bytes} bytes "
+"each (see “{column_name}”)} one{Truncated column name “{column_name}” to "
+"{n_bytes} bytes}}"
+
+#: transpose.py:113
+msgid "warnings.renamedDuplicateColumnNames"
+msgstr ""
+"{n_columns, plural, other{Renamed # duplicate column names (see "
+"“{column_name}”)} one{Renamed duplicate column name “{column_name}”}}"
+
+#: transpose.py:132
+msgid "warnings.tooManyRows"
+msgstr ""
+"We truncated the input to {max_columns} rows so the transposed table "
+"would have a reasonable number of columns."
+
+#: transpose.py:149
+msgid "headersConvertedToText.error"
+msgstr "Headers in column \"{column_name}\" were auto-converted to text."
+
+#: transpose.py:156
+msgid "headersConvertedToText.quick_fix.text"
+msgstr "Convert {column_name} to text"
+
+#: transpose.py:193
+msgid "differentColumnTypes.error"
+msgstr ""
+"{n_columns, plural, other {Columns {column_names} were} one {Column "
+"{column_names} was}} auto-converted to Text because all columns must have"
+" the same type."
+
+#: transpose.py:199
+msgid "warnings.differentColumnTypes.quick_fix.text"
+msgstr "Convert {column_names} to text"
 
