@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2020-02-07 19:43+0000\n"
+"POT-Creation-Date: 2020-02-10 11:31+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: el\n"
@@ -31,39 +31,23 @@ msgstr ""
 msgid "_spec.parameters.firstcolname.placeholder"
 msgstr ""
 
-#: transpose.py:79
-msgid "warnings.removedSpecialCharactersFromColumnNames"
-msgstr ""
-
-#: transpose.py:91
-msgid "warnings.renamedEmptyColumnNames"
-msgstr ""
-
-#: transpose.py:102
-msgid "warnings.truncatedColumnNames"
-msgstr ""
-
-#: transpose.py:113
-msgid "warnings.renamedDuplicateColumnNames"
-msgstr ""
-
-#: transpose.py:132
+#: transpose.py:59
 msgid "warnings.tooManyRows"
 msgstr ""
 
-#: transpose.py:149
+#: transpose.py:78
 msgid "headersConvertedToText.error"
 msgstr ""
 
-#: transpose.py:156
+#: transpose.py:85
 msgid "headersConvertedToText.quick_fix.text"
 msgstr ""
 
-#: transpose.py:193
+#: transpose.py:120
 msgid "differentColumnTypes.error"
 msgstr ""
 
-#: transpose.py:199
+#: transpose.py:124
 msgid "warnings.differentColumnTypes.quick_fix.text"
 msgstr ""
 

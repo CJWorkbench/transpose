@@ -1,15 +1,16 @@
 #!/usr/bin/env python3
 
-from collections import namedtuple
 import datetime
 import unittest
+from collections import namedtuple
+
 import numpy as np
 import pandas as pd
-from pandas.api.types import is_numeric_dtype, is_datetime64_dtype
+from pandas.api.types import is_datetime64_dtype, is_numeric_dtype
 from pandas.testing import assert_frame_equal
-import transpose
-from cjwmodule.testing.i18n import i18n_message
 
+import transpose
+from cjwmodule.testing.i18n import cjwmodule_i18n_message, i18n_message
 
 Column = namedtuple("Column", ("name", "type"))  # transpose ignores 'format'
 
@@ -133,11 +134,13 @@ class RenderTest(unittest.TestCase):
         result = render(table)
 
         self.assertEqual(
-            result[1], 
-            [i18n_message(
-                "warnings.renamedDuplicateColumnNames",
-                {"n_columns": 1, "column_name": "b 2"}
-            )]
+            result[1],
+            [
+                cjwmodule_i18n_message(
+                    "util.colnames.gen_unique_clean_colnames.warnings.renamedDuplicateColumnNames",
+                    {"n_columns": 1, "column_name": "b 2"},
+                )
+            ],
         )
         assert_frame_equal(
             result[0],
@@ -152,15 +155,15 @@ class RenderTest(unittest.TestCase):
         self.assertEqual(
             result[1],
             [
-                i18n_message(
-                    "warnings.renamedEmptyColumnNames",
-                    {"n_columns": 2, "column_name": "Column 4"}
+                cjwmodule_i18n_message(
+                    "util.colnames.gen_unique_clean_colnames.warnings.renamedEmptyColumnNames",
+                    {"n_columns": 2, "column_name": "Column 4"},
                 ),
-                i18n_message(
-                    "warnings.renamedDuplicateColumnNames",
-                    {"n_columns": 1, "column_name": "Column 4"}
-                )
-            ]
+                cjwmodule_i18n_message(
+                    "util.colnames.gen_unique_clean_colnames.warnings.renamedDuplicateColumnNames",
+                    {"n_columns": 1, "column_name": "Column 4"},
+                ),
+            ],
         )
         assert_frame_equal(
             result[0],
@@ -187,40 +190,36 @@ class RenderTest(unittest.TestCase):
             [
                 {
                     "message": i18n_message(
-                        "headersConvertedToText.error",
-                        {"column_name": 'A'}
+                        "headersConvertedToText.error", {"column_name": "A"}
                     ),
-                    "quickFixes":[
+                    "quickFixes": [
                         {
                             "text": i18n_message(
                                 "headersConvertedToText.quick_fix.text",
-                                {"column_name": '"A"'}
+                                {"column_name": '"A"'},
                             ),
                             "action": "prependModule",
                             "args": ["converttotext", {"colnames": ["A"]}],
                         }
-                    ]
+                    ],
                 },
                 {
                     "message": i18n_message(
                         "differentColumnTypes.error",
-                        {
-                            "n_columns": 1,
-                            "column_names": '"C"'
-                        }
+                        {"n_columns": 1, "column_names": '"C"'},
                     ),
-                    "quickFixes":[
+                    "quickFixes": [
                         {
                             "text": i18n_message(
                                 "warnings.differentColumnTypes.quick_fix.text",
-                                {"column_names": '"C"'}
+                                {"column_names": '"C"'},
                             ),
                             "action": "prependModule",
                             "args": ["converttotext", {"colnames": ["C"]}],
                         }
-                    ]
-                }
-            ]
+                    ],
+                },
+            ],
         )
 
     def test_allow_max_n_columns(self):
@@ -270,10 +269,12 @@ class RenderTest(unittest.TestCase):
 
         self.assertEqual(
             result[1],
-            [i18n_message(
-                "warnings.tooManyRows",
-                {"max_columns": transpose.settings.MAX_COLUMNS_PER_TABLE}
-            )],
+            [
+                i18n_message(
+                    "warnings.tooManyRows",
+                    {"max_columns": transpose.settings.MAX_COLUMNS_PER_TABLE},
+                )
+            ],
         )
         # Build expected result as a dictionary first
         d = {"A": ["B"]}
@@ -303,10 +304,15 @@ class RenderTest(unittest.TestCase):
     def test_warn_and_rename_column_if_firstcolname_conflicts(self):
         table = pd.DataFrame({"X": ["B", "C"], "A": ["c", "d"]})
         result = render(table, firstcolname="B")
-        self.assertEqual(result[1], [i18n_message(
-            "warnings.renamedDuplicateColumnNames",
-            {"n_columns": 1, "column_name": "B 2"}
-        )])
+        self.assertEqual(
+            result[1],
+            [
+                cjwmodule_i18n_message(
+                    "util.colnames.gen_unique_clean_colnames.warnings.renamedDuplicateColumnNames",
+                    {"n_columns": 1, "column_name": "B 2"},
+                )
+            ],
+        )
         assert_frame_equal(
             result[0], pd.DataFrame({"B": ["A"], "B 2": ["c"], "C": ["d"]})
         )
