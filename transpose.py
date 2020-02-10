@@ -76,14 +76,14 @@ def render(table, params, *, input_columns):
         warnings.append(
             {
                 "message": i18n.trans(
-                    "headersConvertedToText.error",
+                    "warnings.headersConvertedToText.error",
                     'Headers in column "{column_name}" were auto-converted to text.',
                     {"column_name": column},
                 ),
                 "quickFixes": [
                     {
                         "text": i18n.trans(
-                            "headersConvertedToText.quick_fix.text",
+                            "warnings.headersConvertedToText.quick_fix.text",
                             "Convert {column_name} to text",
                             {"column_name": '"%s"' % column},
                         ),
@@ -114,7 +114,7 @@ def render(table, params, *, input_columns):
         warnings.append(
             {
                 "message": i18n.trans(
-                    "differentColumnTypes.error",
+                    "warnings.differentColumnTypes.error",
                     "{n_columns, plural, other {Columns {column_names} were} one {Column {column_names} was}} "
                     "auto-converted to Text because all columns must have the same type.",
                     {"n_columns": len(to_convert), "column_names": cols_str},

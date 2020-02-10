@@ -190,12 +190,12 @@ class RenderTest(unittest.TestCase):
             [
                 {
                     "message": i18n_message(
-                        "headersConvertedToText.error", {"column_name": "A"}
+                        "warnings.headersConvertedToText.error", {"column_name": "A"}
                     ),
                     "quickFixes": [
                         {
                             "text": i18n_message(
-                                "headersConvertedToText.quick_fix.text",
+                                "warnings.headersConvertedToText.quick_fix.text",
                                 {"column_name": '"A"'},
                             ),
                             "action": "prependModule",
@@ -205,7 +205,7 @@ class RenderTest(unittest.TestCase):
                 },
                 {
                     "message": i18n_message(
-                        "differentColumnTypes.error",
+                        "warnings.differentColumnTypes.error",
                         {"n_columns": 1, "column_names": '"C"'},
                     ),
                     "quickFixes": [

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2020-02-10 11:31+0000\n"
+"POT-Creation-Date: 2020-02-10 12:37+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en\n"
@@ -38,15 +38,15 @@ msgstr ""
 "would have a reasonable number of columns."
 
 #: transpose.py:78
-msgid "headersConvertedToText.error"
+msgid "warnings.headersConvertedToText.error"
 msgstr "Headers in column \"{column_name}\" were auto-converted to text."
 
 #: transpose.py:85
-msgid "headersConvertedToText.quick_fix.text"
+msgid "warnings.headersConvertedToText.quick_fix.text"
 msgstr "Convert {column_name} to text"
 
 #: transpose.py:120
-msgid "differentColumnTypes.error"
+msgid "warnings.differentColumnTypes.error"
 msgstr ""
 "{n_columns, plural, other {Columns {column_names} were} one {Column "
 "{column_names} was}} auto-converted to Text because all columns must have"
