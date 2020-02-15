@@ -11,5 +11,5 @@ setup(
     url="https://github.com/CJWorkbench/transpose",
     packages=[""],
     py_modules=["transpose"],
-    install_requires=["pandas~=0.25.2", "cjwmodule>=1.1.2,==1.*"],
+    install_requires=["pandas~=0.25.2", "cjwmodule>=1.4.0,==1.*"],
 )
