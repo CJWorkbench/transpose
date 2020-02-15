@@ -137,8 +137,8 @@ class RenderTest(unittest.TestCase):
             result[1],
             [
                 cjwmodule_i18n_message(
-                    "util.colnames.gen_unique_clean_colnames.warnings.renamedDuplicateColumnNames",
-                    {"n_columns": 1, "column_name": "b 2"},
+                    "util.colnames.warnings.numbered",
+                    {"n_columns": 1, "first_colname": "b 2"},
                 )
             ],
         )
@@ -156,12 +156,12 @@ class RenderTest(unittest.TestCase):
             result[1],
             [
                 cjwmodule_i18n_message(
-                    "util.colnames.gen_unique_clean_colnames.warnings.renamedEmptyColumnNames",
-                    {"n_columns": 2, "column_name": "Column 4"},
+                    "util.colnames.warnings.default",
+                    {"n_columns": 2, "first_colname": "Column 4"},
                 ),
                 cjwmodule_i18n_message(
-                    "util.colnames.gen_unique_clean_colnames.warnings.renamedDuplicateColumnNames",
-                    {"n_columns": 1, "column_name": "Column 4"},
+                    "util.colnames.warnings.numbered",
+                    {"n_columns": 1, "first_colname": "Column 4"},
                 ),
             ],
         )
@@ -308,8 +308,8 @@ class RenderTest(unittest.TestCase):
             result[1],
             [
                 cjwmodule_i18n_message(
-                    "util.colnames.gen_unique_clean_colnames.warnings.renamedDuplicateColumnNames",
-                    {"n_columns": 1, "column_name": "B 2"},
+                    "util.colnames.warnings.numbered",
+                    {"n_columns": 1, "first_colname": "B 2"},
                 )
             ],
         )
