@@ -76,14 +76,14 @@ def render(table, params, *, input_columns):
         warnings.append(
             {
                 "message": i18n.trans(
-                    "warnings.headersConvertedToText.error",
+                    "warnings.headersConvertedToText.message",
                     'Headers in column "{column_name}" were auto-converted to text.',
                     {"column_name": column},
                 ),
                 "quickFixes": [
                     {
                         "text": i18n.trans(
-                            "warnings.headersConvertedToText.quick_fix.text",
+                            "warnings.headersConvertedToText.quickFix.text",
                             "Convert {column_name} to text",
                             {"column_name": '"%s"' % column},
                         ),
@@ -110,28 +110,28 @@ def render(table, params, *, input_columns):
         # Convert everything to text before converting. (All values must have
         # the same type.)
         to_convert = [c for c in table.columns if input_columns[c].type != "text"]
-        cols_str = ", ".join(f'"{c}"' for c in to_convert)
-        warnings.append(
-            {
-                "message": i18n.trans(
-                    "warnings.differentColumnTypes.error",
-                    "{n_columns, plural, other {Columns {column_names} were} one {Column {column_names} was}} "
-                    "auto-converted to Text because all columns must have the same type.",
-                    {"n_columns": len(to_convert), "column_names": cols_str},
-                ),
-                "quickFixes": [
-                    {
-                        "text": i18n.trans(
-                            "warnings.differentColumnTypes.quick_fix.text",
-                            "Convert {column_names} to text",
-                            {"column_names": cols_str},
-                        ),
-                        "action": "prependModule",
-                        "args": ["converttotext", {"colnames": to_convert},],
-                    }
-                ],
-            }
-        )
+        if to_convert:
+            warnings.append(
+                {
+                    "message": i18n.trans(
+                        "warnings.differentColumnTypes.message",
+                        '{n_columns, plural, other {# columns (see "{first_colname}") were} one {Column "{first_colname}" was}} '
+                        "auto-converted to Text because all columns must have the same type.",
+                        {"n_columns": len(to_convert), "first_colname": to_convert[0]},
+                    ),
+                    "quickFixes": [
+                        {
+                            "text": i18n.trans(
+                                "warnings.differentColumnTypes.quickFix.text",
+                                "Convert {n_columns, plural, other {# columns} one {# column}} to text",
+                                {"n_columns": len(to_convert)},
+                            ),
+                            "action": "prependModule",
+                            "args": ["converttotext", {"colnames": to_convert},],
+                        }
+                    ],
+                }
+            )
 
         for colname in to_convert:
             # TODO respect column formats ... and nix the quick-fix?

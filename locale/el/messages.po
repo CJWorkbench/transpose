@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2020-02-18 16:13+0000\n"
+"POT-Creation-Date: 2020-02-18 17:13+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: el\n"
@@ -36,18 +36,18 @@ msgid "warnings.tooManyRows"
 msgstr ""
 
 #: transpose.py:78
-msgid "warnings.headersConvertedToText.error"
+msgid "warnings.headersConvertedToText.message"
 msgstr ""
 
 #: transpose.py:85
-msgid "warnings.headersConvertedToText.quick_fix.text"
+msgid "warnings.headersConvertedToText.quickFix.text"
 msgstr ""
 
 #: transpose.py:120
-msgid "warnings.differentColumnTypes.error"
+msgid "warnings.differentColumnTypes.message"
 msgstr ""
 
-#: transpose.py:124
-msgid "warnings.differentColumnTypes.quick_fix.text"
+#: transpose.py:127
+msgid "warnings.differentColumnTypes.quickFix.text"
 msgstr ""
 

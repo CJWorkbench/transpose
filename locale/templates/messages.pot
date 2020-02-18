@@ -21,21 +21,21 @@ msgstr ""
 
 #. default-message: Headers in column "{column_name}" were auto-converted to text.
 #: transpose.py:78
-msgid "warnings.headersConvertedToText.error"
+msgid "warnings.headersConvertedToText.message"
 msgstr ""
 
 #. default-message: Convert {column_name} to text
 #: transpose.py:85
-msgid "warnings.headersConvertedToText.quick_fix.text"
+msgid "warnings.headersConvertedToText.quickFix.text"
 msgstr ""
 
-#. default-message: {n_columns, plural, other {Columns {column_names} were} one {Column {column_names} was}} auto-converted to Text because all columns must have the same type.
+#. default-message: {n_columns, plural, other {# columns (see "{first_colname}") were} one {Column "{first_colname}" was}} auto-converted to Text because all columns must have the same type.
 #: transpose.py:120
-msgid "warnings.differentColumnTypes.error"
+msgid "warnings.differentColumnTypes.message"
 msgstr ""
 
-#. default-message: Convert {column_names} to text
-#: transpose.py:124
-msgid "warnings.differentColumnTypes.quick_fix.text"
+#. default-message: Convert {n_columns, plural, other {# columns} one {# column}} to text
+#: transpose.py:127
+msgid "warnings.differentColumnTypes.quickFix.text"
 msgstr ""
 
