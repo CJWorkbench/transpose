@@ -34,20 +34,28 @@ msgstr "(προαιρετικό)"
 #: transpose.py:59
 msgid "warnings.tooManyRows"
 msgstr ""
+"Περικόψαμε την είσοδο σε {max_columns} σειρές έτσι ώστε ο αντιμετατιθέμενος "
+"πίνακας να έχει λογικό αριθμό στηλών."
 
 #: transpose.py:78
 msgid "warnings.headersConvertedToText.message"
 msgstr ""
+"Έγινε αυτόματη μετατροπή των κεφαλίδων στη στήλη \"{column_name}\" σε "
+"κείμενο."
 
 #: transpose.py:85
 msgid "warnings.headersConvertedToText.quickFix.text"
-msgstr ""
+msgstr "Μετατροπή της στήλης {column_name} σε κείμενο"
 
 #: transpose.py:120
 msgid "warnings.differentColumnTypes.message"
 msgstr ""
+"Έγινε αυτόματη μετατροπή {n_columns, plural, other {# στηλών (δες \""
+"{first_colname}\")} one {της στήλης \"{first_colname}\"}} σε κείμενο επειδή "
+"όλες οι στήλες πρέπει να ανήκουν στον ίδιο τύπο."
 
 #: transpose.py:127
 msgid "warnings.differentColumnTypes.quickFix.text"
 msgstr ""
+"Μετατροπή {n_columns, plural, other {# στηλών} one {# στήλης}} σε κείμενο"
 
