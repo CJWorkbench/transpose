@@ -50,7 +50,7 @@ msgstr "Μετατροπή της στήλης {column_name} σε κείμενο
 #: transpose.py:120
 msgid "warnings.differentColumnTypes.message"
 msgstr ""
-"Έγινε αυτόματη μετατροπή {n_columns, plural, other {# στηλών (δες \""
+"Έγινε αυτόματη μετατροπή {n_columns, plural, other {# στηλών (δείτε \""
 "{first_colname}\")} one {της στήλης \"{first_colname}\"}} σε κείμενο επειδή "
 "όλες οι στήλες πρέπει να ανήκουν στον ίδιο τύπο."
 
