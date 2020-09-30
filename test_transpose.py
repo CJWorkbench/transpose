@@ -20,7 +20,7 @@ def render(table, firstcolname="", input_columns=None):
         if is_numeric_dtype(series):
             return "number"
         elif is_datetime64_dtype(series):
-            return "datetime"
+            return "timestamp"
         else:
             return "text"
 
