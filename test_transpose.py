@@ -3,6 +3,7 @@
 import datetime
 import unittest
 from collections import namedtuple
+from typing import NamedTuple
 
 import numpy as np
 import pandas as pd
@@ -15,7 +16,12 @@ from cjwmodule.testing.i18n import cjwmodule_i18n_message, i18n_message
 Column = namedtuple("Column", ("name", "type"))  # transpose ignores 'format'
 
 
-def render(table, firstcolname="", input_columns=None):
+class DefaultSettings(NamedTuple):
+    MAX_COLUMNS_PER_TABLE: int = 1000
+    MAX_BYTES_PER_COLUMN_NAME: int = 100
+
+
+def render(table, firstcolname="", input_columns=None, settings=DefaultSettings()):
     def _infer_type(series):
         if is_numeric_dtype(series):
             return "number"
@@ -31,7 +37,10 @@ def render(table, firstcolname="", input_columns=None):
         input_columns = {c: _infer_column(c) for c in table.columns}
 
     return transpose.render(
-        table, {"firstcolname": firstcolname}, input_columns=input_columns
+        table,
+        {"firstcolname": firstcolname},
+        input_columns=input_columns,
+        settings=settings,
     )
 
 
@@ -225,63 +234,49 @@ class RenderTest(unittest.TestCase):
     def test_allow_max_n_columns(self):
         table = pd.DataFrame(
             {
-                "A": pd.Series(
-                    [
-                        chr(x + 100)
-                        for x in range(transpose.settings.MAX_COLUMNS_PER_TABLE)
-                    ]
-                ),
-                "B": pd.Series(
-                    [
-                        chr(x + 120)
-                        for x in range(transpose.settings.MAX_COLUMNS_PER_TABLE)
-                    ]
-                ),
+                "A": ["a1", "a2", "a3"],
+                "B": ["b1", "b2", "b3"],
             }
         )
-        result = render(table)
+        result = render(table, settings=DefaultSettings(MAX_COLUMNS_PER_TABLE=3))
 
-        # Build expected result as a dictionary first
-        d = {"A": ["B"]}
-        for i in range(0, transpose.settings.MAX_COLUMNS_PER_TABLE):
-            d[chr(i + 100)] = chr(i + 120)
-
-        assert_frame_equal(result, pd.DataFrame(d))
+        assert_frame_equal(
+            result,
+            pd.DataFrame(
+                {
+                    "A": ["B"],
+                    "a1": ["b1"],
+                    "a2": ["b2"],
+                    "a3": ["b3"],
+                }
+            ),
+        )
 
     def test_truncate_past_max_n_columns(self):
         table = pd.DataFrame(
             {
-                "A": pd.Series(
-                    [
-                        str(x)
-                        for x in range(transpose.settings.MAX_COLUMNS_PER_TABLE + 1)
-                    ]
-                ),
-                "B": pd.Series(
-                    [
-                        str(x + 1000)
-                        for x in range(transpose.settings.MAX_COLUMNS_PER_TABLE + 1)
-                    ]
-                ),
+                "A": ["a1", "a2", "a3", "a4"],
+                "B": ["b1", "b2", "b3", "b4"],
             }
         )
-        result = render(table)
+        result = render(table, settings=DefaultSettings(MAX_COLUMNS_PER_TABLE=3))
+
+        assert_frame_equal(
+            result[0],
+            pd.DataFrame(
+                {
+                    "A": ["B"],
+                    "a1": ["b1"],
+                    "a2": ["b2"],
+                    "a3": ["b3"],
+                }
+            ),
+        )
 
         self.assertEqual(
             result[1],
-            [
-                i18n_message(
-                    "warnings.tooManyRows",
-                    {"max_columns": transpose.settings.MAX_COLUMNS_PER_TABLE},
-                )
-            ],
+            [i18n_message("warnings.tooManyRows", {"max_columns": 3})],
         )
-        # Build expected result as a dictionary first
-        d = {"A": ["B"]}
-        for i in range(transpose.settings.MAX_COLUMNS_PER_TABLE):
-            d[str(i)] = str(i + 1000)
-
-        assert_frame_equal(result[0], pd.DataFrame(d))
 
     def test_transpose_categorical_and_rename_index(self):
         # Avoid TypeError: cannot insert an item into a CategoricalIndex

@@ -1,5 +1,4 @@
-from dataclasses import dataclass
-from typing import Iterator, List, Set
+from typing import Iterator, List, NamedTuple, Protocol, Set
 
 import numpy as np
 import pandas as pd
@@ -8,18 +7,12 @@ from cjwmodule import i18n
 from cjwmodule.util.colnames import gen_unique_clean_colnames_and_warn
 
 
-# hard-code settings for now. TODO have Workbench pass render(..., settings=...)
-@dataclass
-class Settings:
+class Settings(Protocol):
     MAX_COLUMNS_PER_TABLE: int
     MAX_BYTES_PER_COLUMN_NAME: int
 
 
-settings = Settings(99, 120)
-
-
-@dataclass
-class GenColnamesResult:
+class GenColnamesResult(NamedTuple):
     names: List[str]
     """All column names for the output table (even the first column)."""
 
@@ -28,7 +21,7 @@ class GenColnamesResult:
 
 
 def _gen_colnames_and_warn(
-    first_colname: str, first_column: pd.Series
+    first_colname: str, first_column: pd.Series, settings: Settings
 ) -> GenColnamesResult:
     """
     Generate transposed-table column names.
@@ -49,7 +42,7 @@ def _gen_colnames_and_warn(
     return GenColnamesResult(names, warnings)
 
 
-def render(table, params, *, input_columns):
+def render(table, params, *, input_columns, settings: Settings):
     warnings = []
     colnames_auto_converted_to_text = []
 
@@ -88,7 +81,10 @@ def render(table, params, *, input_columns):
                             {"column_name": '"%s"' % column},
                         ),
                         "action": "prependModule",
-                        "args": ["converttotext", {"colnames": [column]},],
+                        "args": [
+                            "converttotext",
+                            {"colnames": [column]},
+                        ],
                     }
                 ],
             }
@@ -102,7 +98,9 @@ def render(table, params, *, input_columns):
     first_column = first_column.astype(str)
     first_column[na] = ""  # Empty values are all equivalent
 
-    gen_headers_result = _gen_colnames_and_warn(params["firstcolname"], first_column)
+    gen_headers_result = _gen_colnames_and_warn(
+        params["firstcolname"], first_column, settings
+    )
     warnings.extend(gen_headers_result.warnings)
 
     input_types = set(c.type for c in input_columns.values() if c.name != column)
@@ -127,7 +125,10 @@ def render(table, params, *, input_columns):
                                 {"n_columns": len(to_convert)},
                             ),
                             "action": "prependModule",
-                            "args": ["converttotext", {"colnames": to_convert},],
+                            "args": [
+                                "converttotext",
+                                {"colnames": to_convert},
+                            ],
                         }
                     ],
                 }

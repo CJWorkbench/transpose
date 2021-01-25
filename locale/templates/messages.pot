@@ -15,27 +15,27 @@ msgid "_spec.parameters.firstcolname.placeholder"
 msgstr ""
 
 #. default-message: We truncated the input to {max_columns} rows so the transposed table would have a reasonable number of columns.
-#: transpose.py:59
+#: transpose.py:52
 msgid "warnings.tooManyRows"
 msgstr ""
 
 #. default-message: Headers in column "{column_name}" were auto-converted to text.
-#: transpose.py:78
+#: transpose.py:71
 msgid "warnings.headersConvertedToText.message"
 msgstr ""
 
 #. default-message: Convert {column_name} to text
-#: transpose.py:85
+#: transpose.py:78
 msgid "warnings.headersConvertedToText.quickFix.text"
 msgstr ""
 
 #. default-message: {n_columns, plural, other {# columns (see "{first_colname}") were} one {Column "{first_colname}" was}} auto-converted to Text because all columns must have the same type.
-#: transpose.py:120
+#: transpose.py:118
 msgid "warnings.differentColumnTypes.message"
 msgstr ""
 
 #. default-message: Convert {n_columns, plural, other {# columns} one {# column}} to text
-#: transpose.py:127
+#: transpose.py:125
 msgid "warnings.differentColumnTypes.quickFix.text"
 msgstr ""
 
